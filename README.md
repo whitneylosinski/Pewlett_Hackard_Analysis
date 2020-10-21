@@ -122,7 +122,7 @@ CREATE TABLE titles(
 
     ```sql
     --Find the number of unique titles
-    SELECT COUNT(ut.emp_title), ut.title
+    SELECT COUNT(ut.emp_no), ut.title
     INTO retiring_titles
     FROM unique_titles as ut
     GROUP BY ut.title
