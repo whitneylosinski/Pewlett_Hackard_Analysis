@@ -89,8 +89,14 @@ CREATE TABLE titles(
     </tr>
     </table
 
-3. )  ***Eligibility by Position:*** The third step was to determine the number of employees eligible for retirement per title.  To do this, the employee.csv data was left joined to the titles.csv data on the employee number and filtered to only those employees whose birth dates were between 1/1/1952 and 12/31/1955.  The output table was saved as a new table called `retirement_titles`.  See the script and a portion of the resulting table below.
-
+3. )  ***Eligibility by Position:*** The third step was to determine the number of employees eligible for retirement per title.  To do this, the employee.csv data was inner joined to the titles.csv data on the employee number and filtered to only those employees whose birth dates were between 1/1/1952 and 12/31/1955.  The output table was saved as a new table called `retirement_titles`.  After running this table, it was discovered that the data could be better filtered to only include employees born between 1952 and 1955 who were still curretnly employed.  To do this another WHERE filter was added to only include employees with a to_date of 1/1/9999.  See the scripts and a portion of the resulting original table below.
+   
+    <table>
+    <th>Challenge Script</th>
+    <th>Revised Script</th>
+    <tr>
+    <td>
+	    
     ```sql
     --Table of Retirees and their titles
     SELECT e.emp_no,
@@ -101,13 +107,46 @@ CREATE TABLE titles(
         t.to_date
     INTO retirement_titles
     FROM employees as e
-        LEFT JOIN titles as t
+        INNER JOIN titles as t
             ON (e.emp_no = t.emp_no)
     WHERE e.birth_date BETWEEN '1952-01-01' AND '1955-12-31'
     ORDER BY e.emp_no;
     ```
-    From the data in `retirement_titles` it was discovered that there were duplicate entries for some employees because they had switched titles over the years.  To remove the duplicate entries, a DISTINCT ON statement was used on the 'retirement_titles' table to return only the distinct (different) values of the employee number and remove any duplicates.  The resulting table was then saved as a new table named `unique_titles`. The script and a portion of the resulting table are below.
+    
+    </td>
+    <td>
+	
+    ```sql
+    --Table of Retirees and their titles
+    SELECT e.emp_no,
+        e.first_name,
+        e.last_name,
+        t.title,
+        t.from_date,
+        t.to_date
+    INTO current_retirement_titles
+    FROM employees as e
+        INNER JOIN titles as t
+            ON (e.emp_no = t.emp_no)
+    WHERE (de.to_date = '9999-01-01')
+    	AND (e.birth_date BETWEEN '1952-01-01' AND '1955-12-31')
+    ORDER BY e.emp_no;
+    ```
+    
+    </td>
+    </tr>
+    </table
+	
+    ![retirement_titles](https://github.com/whitneylosinski/Pewlett_Hackard_Analysis/blob/main/Data/PNG's%20of%20tables/retirement_titles.png)
+    
+    From the data in `retirement_titles` and `current_retirement_titles` it was discovered that there were duplicate entries for some employees because they had switched titles over the years.  To remove the duplicate entries, a DISTINCT ON statement was used on each of the tables to return only the distinct (different) values of the employee number and remove any duplicates.  The resulting tables were then saved as new tables named `unique_titles` for all employees born between 1952 and 1955 and `current_unique_titles` for only those still currently employed who were born within the date range. The script and a portion of the resulting table are below.
 
+    <table>
+    <th>Challenge Script</th>
+    <th>Revised Script</th>
+    <tr>
+    <td>
+	    
     ```sql
     -- Use Dictinct with Orderby to remove duplicate rows
     SELECT DISTINCT ON (rt.emp_no) rt.emp_no,
@@ -118,8 +157,35 @@ CREATE TABLE titles(
     FROM retirement_titles as rt
     ORDER BY rt.emp_no, rt.to_date DESC;
     ```
-    And finally, to find the number of eligible employees for retirement, a COUNT statement was used on the `unique_titles` table to count the total number of employee numbers for each title and output a new table called retiring_titles grouped by title in descending order.  See the script and resulting table below.
+    
+    </td>
+    <td>
+    
+    ```sql
+    -- Use Dictinct with Orderby to remove duplicate rows
+    SELECT DISTINCT ON (crt.emp_no) crt.emp_no,
+        crt.first_name,
+        crt.last_name,
+        crt.title
+    INTO current_unique_titles
+    FROM current_retirement_titles as crt
+    ORDER BY crt.emp_no, crt.to_date DESC;
+    ```
+    
+   </td>
+   </tr>
+   </table
+    
+   ![unique_titles](https://github.com/whitneylosinski/Pewlett_Hackard_Analysis/blob/main/Data/PNG's%20of%20tables/unique_titles.png)
+    
+   And finally, to find the number of eligible employees for retirement, a COUNT statement was used on the `unique_titles` and `current_uniqu_titles` tables to count the total number of employee numbers for each title and output two new tables called `retiring_titles` for all employees born between 1952 and 1955 and `current_retiring_titles` for only those still currently employed who were born within the date range, grouped by title in descending order.  See the script and resulting table below.
 
+    <table>
+    <th>Challenge Script</th>
+    <th>Revised Script</th>
+    <tr>
+    <td>
+    
     ```sql
     --Find the number of unique titles
     SELECT COUNT(ut.emp_no), ut.title
@@ -128,7 +194,23 @@ CREATE TABLE titles(
     GROUP BY ut.title
     ORDER BY ut.count DESC;
     ```
-
+    ![retiring_titles](https://github.com/whitneylosinski/Pewlett_Hackard_Analysis/blob/main/Data/PNG's%20of%20tables/retiring_titles.png)
+    </td>
+    <td> 
+    
+    ```sql
+    --Find the number of unique titles
+    SELECT COUNT(cut.emp_no), cut.title
+    INTO current_retiring_titles
+    FROM current_unique_titles as cut
+    GROUP BY cut.title
+    ORDER BY cut.count DESC;
+    ```
+    ![current_retiring_titles](https://github.com/whitneylosinski/Pewlett_Hackard_Analysis/blob/main/Data/PNG's%20of%20tables/current_retiring_titles.png)
+   </td>
+   </tr>
+   </table      
+	
 4. )  ***Mentorship Eligibility:*** The fourth and final step of the analysis was to determine the employees who were eligible for the mentorship program.  To do this, the dept_emp.csv data and the titles.csv data were each left joined to the employees.csv data on the employee number.  The data was filtered to only inlcude employees who were still employed with a `to_date` of 01-01-9999 and who were born between 01-01-1965 and 12-31-1965.  Again, the duplicate entries were removed using the DISTINCT ON statement for the employee number and the data was ordered by the employee number.  The script and a portion of the resulting table are below.
     ```sql
     --Table of Mentorship Eligibility
@@ -141,15 +223,28 @@ CREATE TABLE titles(
     	t.title
     INTO mentorship_eligibility
     FROM employees as e
-	LEFT JOIN dept_emp as de
+	INNER JOIN dept_emp as de
      	    ON (e.emp_no = de.emp_no)
-	LEFT JOIN titles as t
+	INNER JOIN titles as t
     	    ON (e.emp_no = t.emp_no)
     WHERE (de.to_date = '9999-01-01')
         AND (e.birth_date BETWEEN '1965-01-01' AND '1965-12-31')
     ORDER BY e.emp_no;
     ```
+    ![mentorship_eligibility](https://github.com/whitneylosinski/Pewlett_Hackard_Analysis/blob/main/Data/PNG's%20of%20tables/mentorship_eligibility.png)
     
-## Summary: Provide high-level responses to the following questions, then provide two additional queries or tables that may provide more insight into the upcoming "silver tsunami."
- - How many roles will need to be filled as the "silver tsunami" begins to make an impact?
+## Summary:
+
+Using the results of the analysis, the two questions the analysis was seeking to answer can easily be found.
+ - How many roles will need to be filled as the "silver tsunami" begins to make an impact? 
+ 	- The number of roles to be filled is found by adding the number of retirees from each department in the `retiring_titles` table shown below.  The total number of roles, based on the original script (the challenge requirements) to be filled is 90,398 positions across 7 different titles.  Using the revised script, the data shows there are 72,458 positions to be filled across 7 different titles.
+ 
  - Are there enough qualified, retirement-ready employees in the departments to mentor the next generation of Pewlett Hackard employees?
+ 	- The nubmer of employees listed in the `mentorship_eligibilty` table is 1,549.  With over 70,000 qualified, retirement-ready employees and only 1,500 employees eligible for the mentorship program, Pewlett Hackard will have more than enough employees to mentor the next generation.
+	
+Two additional queries and tables that may provide more insight into the upcoming "Silver tsunami" are shown below.  These tables will provide more information on whether there are enough eligible, retirement-ready employees per department to mentor the mentorship-eligible employees in their department.
+ - The first table shows the number of retirement-ready employees per department.
+ 
+ 
+ - The second table shows the number of mentorship-eligible employees per department.
+
