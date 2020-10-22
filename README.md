@@ -245,6 +245,97 @@ Using the results of the analysis, the two questions the analysis was seeking to
 Two additional queries and tables that may provide more insight into the upcoming "Silver tsunami" are shown below.  These tables will provide more information on whether there are enough eligible, retirement-ready employees per department to mentor the mentorship-eligible employees in their department.
  - The first table shows the number of retirement-ready employees per department.
  
+ 	<table>
+ 	<tr>
+ 	<td>
+ 	
+	```sql
+ 	--Table of Currently Employed Retirees and their departments
+	SELECT e.emp_no,
+    	    e.first_name,
+    	    e.last_name,
+    	    de.dept_no,
+    	    de.from_date,
+    	    de.to_date
+	INTO current_retirement_departments
+	FROM employees as e
+    	    INNER JOIN dept_emp as de
+        	ON (e.emp_no = de.emp_no)
+	WHERE (de.to_date = '9999-01-01')
+	    AND (e.birth_date BETWEEN '1952-01-01' AND '1955-12-31')
+	ORDER BY e.emp_no;
+	
+	--Use Dictinct with Orderby to remove duplicate rows
+	SELECT DISTINCT ON (crd.emp_no) crd.emp_no,
+    	    crd.first_name,
+    	    crd.last_name,
+    	    crd.dept_no
+	INTO current_unique_departments
+	FROM current_retirement_departments as crd
+	ORDER BY crd.emp_no, crd.to_date DESC;
+
+	--Find the number current retirees of unique departments
+	SELECT COUNT(cud.emp_no), cud.dept_no
+	INTO current_retiring_titles
+	FROM current_unique_departments as cud
+	GROUP BY cud.dept_no
+	ORDER BY cud.count DESC;
+	```
+	
+ 	</td>
+ 	<td> 
  
+ 	![current_unique_departments](https://github.com/whitneylosinski/Pewlett_Hackard_Analysis/blob/main/Data/PNG's%20of%20tables/current_unique_departments.png)
+ 
+ 	</td>
+ 	</tr>
+ 	</table>    
+   
  - The second table shows the number of mentorship-eligible employees per department.
 
+ 	<table>
+ 	<tr>
+ 	<td>
+		
+	```sql
+ 	--Table of Mentorship Eligibility
+	SELECT DISTINCT ON (e.emp_no) e.emp_no, 
+    	    e.first_name,
+    	    e.last_name,
+    	    e.birth_date,
+    	    de.from_date,
+    	    de.to_date,
+    	    de.dept_no
+	INTO mentorship_eligibility_departments
+	FROM employees as e
+	    INNER JOIN dept_emp as de
+    		ON (e.emp_no = de.emp_no)
+	WHERE (de.to_date = '9999-01-01')
+    	    AND (e.birth_date BETWEEN '1965-01-01' AND '1965-12-31')
+	ORDER BY e.emp_no;
+
+	--Use Dictinct with Orderby to remove duplicate rows
+	SELECT DISTINCT ON (med.emp_no) med.emp_no,
+   	    med.first_name,
+    	    med.last_name,
+    	    med.dept_no
+	INTO unique_membership_departments
+	FROM mentorship_eligibility_departments as med
+	ORDER BY med.emp_no, med.to_date DESC;
+
+	--Find the number current mentorship-eligible employees of unique departments
+	SELECT COUNT(umd.emp_no), umd.dept_no
+	INTO membership_count_departments
+	FROM unique_membership_departments as umd
+	GROUP BY umd.dept_no
+	ORDER BY umd.count DESC;
+	```
+	
+	</td>
+ 	<td> 
+ 
+ 	![membership_count_departments](https://github.com/whitneylosinski/Pewlett_Hackard_Analysis/blob/main/Data/PNG's%20of%20tables/membership_count_departments.png)
+
+ 	</td>
+ 	</tr>
+ 	</table>  
