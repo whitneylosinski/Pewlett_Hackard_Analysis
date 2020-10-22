@@ -334,7 +334,7 @@ Two additional queries and tables that may provide more insight into the upcomin
 	</td>
  	<td> 
  
- 	![membership_count_departments](https://github.com/whitneylosinski/Pewlett_Hackard_Analysis/blob/main/Data/PNG's%20of%20tables/membership_count_departments.png)
+ 	![mentorship_count_departments](https://github.com/whitneylosinski/Pewlett_Hackard_Analysis/blob/main/Data/PNG's%20of%20tables/mentorship_count_departments.png)
 
  	</td>
  	</tr>
