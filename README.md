@@ -2,7 +2,7 @@
 
 ## Overview of the Analysis:
 
-The HR Analyst at Pewlett Hackard requested help with analyzing data to prepare for the upcoming retirement wave of baby boomer employees.  The company is trying to plan ahead to determine who will be retiring in the next few years and how many positions will need to be filled.  The analyst requested that six different Excel data sets be analyzed using SQL to determine the number of employees eligible for retirement for each position title and the number of employees eligible to participate in a mentorship program.
+The HR Analyst at Pewlett Hackard requested help with analyzing data to prepare for the upcoming "silver tsunami" retirement wave of baby boomer employees.  The company is trying to plan ahead to determine who will be retiring in the next few years and how many positions will need to be filled.  The analyst requested that six different Excel data sets be analyzed using SQL to determine the number of employees eligible for retirement for each position title and the number of employees eligible to participate in a mentorship program.
 
 ## Resources:
 
@@ -89,7 +89,7 @@ CREATE TABLE titles(
     </tr>
     </table
 
-3. )  ***Eligibility by Position:*** The third step was to determine the number of employees eligible for retirement per title.  To do this, the employee.csv data was inner joined to the titles.csv data on the employee number and filtered to only those employees whose birth dates were between 1/1/1952 and 12/31/1955.  The output table was saved as a new table called `retirement_titles`.  After running this table, it was discovered that the data could be better filtered to only include employees born between 1952 and 1955 who were still curretnly employed.  To do this another WHERE filter was added to only include employees with a to_date of 1/1/9999.  See the scripts and a portion of the resulting original table below.
+3. )  ***Eligibility by Position:*** The third step was to determine the number of employees eligible for retirement per title.  To do this, the employee.csv data was inner joined to the titles.csv data on the employee number and filtered to only those employees whose birth dates were between 1/1/1952 and 12/31/1955.  The output table was saved as a new table called `retirement_titles`.  After running this table, it was discovered that the data could be better filtered to only include employees born between 1952 and 1955 who were still currently employed.  To do this another WHERE filter was added to only include employees with a to_date of 1/1/9999.  See the scripts and a portion of the resulting original table below.
    
     <table>
     <th>Challenge Script</th>
@@ -139,7 +139,7 @@ CREATE TABLE titles(
 	
     ![retirement_titles](https://github.com/whitneylosinski/Pewlett_Hackard_Analysis/blob/main/Data/PNG's%20of%20tables/retirement_titles.png)
     
-    From the data in `retirement_titles` and `current_retirement_titles` it was discovered that there were duplicate entries for some employees because they had switched titles over the years.  To remove the duplicate entries, a DISTINCT ON statement was used on each of the tables to return only the distinct (different) values of the employee number and remove any duplicates.  The resulting tables were then saved as new tables named `unique_titles` for all employees born between 1952 and 1955 and `current_unique_titles` for only those still currently employed who were born within the date range. The script and a portion of the resulting table are below.
+    From the data in `retirement_titles` and `current_retirement_titles` it was discovered that there were duplicate entries for some employees because they had switched titles over the years.  To remove the duplicate entries, a DISTINCT ON statement was used on each of the tables to return only the distinct (different) values of the employee number and remove any duplicates.  The resulting tables were then saved as new tables named `unique_titles` for all employees born between 1952 and 1955 and `current_unique_titles` for only those still currently employed who were born within the date range. The scripts and a portion of the resulting table are below.
 
     <table>
     <th>Challenge Script</th>
@@ -178,7 +178,7 @@ CREATE TABLE titles(
     
    ![unique_titles](https://github.com/whitneylosinski/Pewlett_Hackard_Analysis/blob/main/Data/PNG's%20of%20tables/unique_titles.png)
     
-   And finally, to find the number of eligible employees for retirement, a COUNT statement was used on the `unique_titles` and `current_uniqu_titles` tables to count the total number of employee numbers for each title and output two new tables called `retiring_titles` for all employees born between 1952 and 1955 and `current_retiring_titles` for only those still currently employed who were born within the date range, grouped by title in descending order.  See the script and resulting table below.
+   And finally, to find the number of eligible employees for retirement, a COUNT statement was used on the `unique_titles` and `current_unique_titles` tables to count the total number of employee numbers for each title and output two new tables called `retiring_titles`, for all employees born between 1952 and 1955, and `current_retiring_titles`, for only those still currently employed who were born within the date range.  The tables were grouped by title in descending order.  See the scripts and resulting tables below.
 
     <table>
     <th>Challenge Script</th>
@@ -237,7 +237,7 @@ CREATE TABLE titles(
 
 Using the results of the analysis, the two questions the analysis was seeking to answer can easily be found.
  - How many roles will need to be filled as the "silver tsunami" begins to make an impact? 
- 	- The number of roles to be filled is found by adding the number of retirees from each department in the `retiring_titles` table shown below.  The total number of roles, based on the original script (the challenge requirements) to be filled is 90,398 positions across 7 different titles.  Using the revised script, the data shows there are 72,458 positions to be filled across 7 different titles.
+ 	- The number of roles to be filled is found by adding the number of retirees from each department in the `retiring_titles` table.  The total number of roles, based on the original script (the challenge requirements) to be filled is 90,398 positions across 7 different titles.  Using the revised script (filtered to currently employed), the data shows there are 72,458 positions to be filled across 7 different titles.
  
  - Are there enough qualified, retirement-ready employees in the departments to mentor the next generation of Pewlett Hackard employees?
  	- The nubmer of employees listed in the `mentorship_eligibilty` table is 1,549.  With over 70,000 qualified, retirement-ready employees and only 1,500 employees eligible for the mentorship program, Pewlett Hackard will have more than enough employees to mentor the next generation.
@@ -323,7 +323,8 @@ Two additional queries and tables that may provide more insight into the upcomin
 	FROM mentorship_eligibility_departments as med
 	ORDER BY med.emp_no, med.to_date DESC;
 
-	--Find the number current mentorship-eligible employees of unique departments
+	--Find the number current mentorship-eligible 
+	    --employees of unique departments
 	SELECT COUNT(umd.emp_no), umd.dept_no
 	INTO membership_count_departments
 	FROM unique_membership_departments as umd
